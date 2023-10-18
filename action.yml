@@ -13,6 +13,12 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        # We have to fetch the full history so that the merge step will understand
+        # how to properly merge the starter repo with our local changes.
+        fetch-depth: 0
     # TODO: It would be nice to be able to set this to be the username & email of the user who
     # triggered this action. Unfortuately GitHub doesn't make the email address available.
     - name: Set git config
