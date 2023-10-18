@@ -9,7 +9,6 @@ inputs:
     description: 'The token to use for github access'
     required: true
     type: string
-outputs:
 
 runs:
   using: "composite"
@@ -17,6 +16,7 @@ runs:
     # TODO: It would be nice to be able to set this to be the username & email of the user who
     # triggered this action. Unfortuately GitHub doesn't make the email address available.
     - name: Set git config
+      shell: bash
       run: |
         git config user.name ${{ github.actor }}
         git config user.email ${{ github.actor }}@users.noreply.github.com
@@ -37,35 +37,41 @@ runs:
         ruby-version: 3.2
 
     - name: Fetch Bullet Train Starter Repo
+      shell: bash
       run: |
         git remote add bullet-train https://github.com/bullet-train-co/bullet_train.git
         git fetch --tags bullet-train
 
     # This step is run when a version was passed in
     - name: Target the passed in version
+      shell: bash
       run: |
         echo "TARGET_VERSION=${{ inputs.versionNumber }}" >> "$GITHUB_ENV"
       if: inputs.versionNumber != ''
 
     # This step is run if a version was not passed in
     - name: Target the latest version
+      shell: bash
       run: |
         echo "TARGET_VERSION=$(git describe --tags $(git rev-list --tags --max-count=1))" >> "$GITHUB_ENV"
       if: inputs.versionNumber == ''
 
     # Allow for versions to be pass in either with or without the leading 'v'
     - name: Strip leading 'v'
+      shell: bash
       run: |
         echo "TARGET_VERSION=$(echo $TARGET_VERSION | sed 's/v//g')" >> "$GITHUB_ENV"
       if: startsWith(env.TARGET_VERSION, 'v')
 
     - name: Check for version
       id: version-check
+      shell: bash
       run: |
         echo "TAG=$(git tag -l v${{ env.TARGET_VERSION }})" >> $GITHUB_OUTPUT
 
     - name: Verify version exists
       if: ${{ steps.version-check.outputs.TAG == '' }}
+      shell: bash
       run: |
         echo >&2 "::error:: Version v${{ env.TARGET_VERSION }} not found in bullet-train repo."
         exit 1
@@ -74,6 +80,7 @@ runs:
       # If there's a merge conflict it exits with an error code and would cause the workflow to fail,
       # but we don't want that. We want to continue and we'll mark the PR as containing a conflict.
       continue-on-error: true
+      shell: bash
       run: git merge v${{ env.TARGET_VERSION }}
 
 
@@ -81,6 +88,7 @@ runs:
     # Since it's an auto-generated file we can just use whatever is in the downstreadm app
     # and then run `bundle install` to ensure that it's in sync with Gemfile
     - name: Fix Gemfile.lock
+      shell: bash
       run: |
         git checkout HEAD -- Gemfile.lock
         # We have to do this so that a subsequent `bundle install` will work without complaining
@@ -92,11 +100,13 @@ runs:
 
     - name: Check for conflicts
       id: conflicts
+      shell: bash
       run: |
         echo "FILES=$(git status --porcelain | grep '^UU' | sed 's/UU/*/g')" >> $GITHUB_OUTPUT
 
     # This step is run when there are no conflicts
     - name: Set PR conflict message for no conflicts
+      shell: bash
       run: |
         {
           echo 'PR_CONFLICT_MESSAGE<<EOF'
@@ -107,6 +117,7 @@ runs:
 
     # This step is run when there are conflicts that need to be resolved
     - name: Set PR conflict message for conflicts
+      shell: bash
       run: |
         {
           echo 'PR_CONFLICT_MESSAGE<<EOF'
@@ -132,17 +143,20 @@ runs:
 
     # This step is run when there are no conflicts
     - name: Set draft status = false
+      shell: bash
       run: |
         echo "DRAFT_STATUS=false" >> "$GITHUB_ENV"
       if: steps.conflicts.outputs.FILES == ''
 
     # This step is run when there are conflicts that need to be resolved
     - name: Set draft status = true
+      shell: bash
       run: |
         echo "DRAFT_STATUS=true" >> "$GITHUB_ENV"
       if: ${{ steps.conflicts.outputs.FILES != '' }}
 
     - name: Finish the merge
+      shell: bash
       run: |
         git add .
         git commit --no-edit
