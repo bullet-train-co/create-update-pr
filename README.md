@@ -29,8 +29,16 @@ For repositories belonging to an organization, this setting can be managed by ad
 | `token` | `GITHUB_TOKEN` (permissions `contents: write` and `pull-requests: write`) or a `repo` scoped [Personal Access Token (PAT)](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token). | `GITHUB_TOKEN` |
 | `versionNumber` | The version that you want to upgrade to. | If not supplied we'll used the latest published version. |
 
+### Why you should use a PAT
+
 If you have any workflows set up that are triggered when a PR is created you'll want to setup a Personal Access Token and pass that in.
 This is due to a limitation on the default `GITHUB_TOKEN` which is unable to trigger additional workflows.
+
+### Creating a PAT
+
+You can use the new "Fine-grained tokens" when creating your token. You'll need to set "Contents" and "Pull Request" permissions to be read/write.
+
+![Creating a fine-grained personal access token](images/fine-grained-pat.png)
 
 ## Action Outputs
 
