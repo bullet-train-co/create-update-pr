@@ -9,6 +9,7 @@ inputs:
     description: 'The token to use for github access'
     required: true
     type: string
+    default: ${{ github.token }}
 
 runs:
   using: "composite"
