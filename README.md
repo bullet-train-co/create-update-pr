@@ -34,6 +34,12 @@ For repositories belonging to an organization, this setting can be managed by ad
 If you have any workflows set up that are triggered when a PR is created you'll want to setup a Personal Access Token and pass that in.
 This is due to a limitation on the default `GITHUB_TOKEN` which is unable to trigger additional workflows.
 
+**NOTE:**
+
+When you use a PAT the resulting PR will show as being opened by the owner of the PAT, **not** by the person who ran the action.
+
+If you **do not** use a PAT then the PR will show as being opened by `github-actions (bot)`. (But workflows will not run, as mentioned above.)
+
 ### Creating a PAT
 
 When creating a [Personal Access Token (PAT)](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token) you have two choices.
