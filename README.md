@@ -36,7 +36,14 @@ This is due to a limitation on the default `GITHUB_TOKEN` which is unable to tri
 
 ### Creating a PAT
 
-You can use the new "Fine-grained tokens" when creating your token. You'll need to set "Contents" and "Pull Request" permissions to be read/write.
+When creating a [Personal Access Token (PAT)](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token) you have two choices.
+
+1. Use the new "Fine-grained tokens" when creating your token. You'll need to select the appropriate repo(s), and set "Contents" and "Pull Request" permissions to be read/write.
+2. Create a "classic" token with the `repo` scope. This token will have access to _ALL_ your repos, so we don't really recommend it.
+
+Once you've generated your token add it to your repository secretes as `PAT`.
+
+Here's a screenshot of setting up a fine-grained token:
 
 ![Creating a fine-grained personal access token](images/fine-grained-pat.png)
 
