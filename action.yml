@@ -110,6 +110,9 @@ runs:
         bundle install
         # This is an artifact of installing the gems, and we don't want to add it to the PR.
         rm -rf vendor/bundle
+        # Now we add the changes and commit
+        git add .
+        git commit --no-edit
 
     - name: Check for conflicts
       id: conflicts
@@ -167,12 +170,6 @@ runs:
       run: |
         echo "DRAFT_STATUS=true" >> "$GITHUB_ENV"
       if: ${{ steps.conflicts.outputs.FILES != '' }}
-
-    - name: Finish the merge
-      shell: bash
-      run: |
-        git add .
-        git commit --no-edit
 
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v5
