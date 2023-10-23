@@ -172,6 +172,7 @@ runs:
     # This is an artifact of installing the gems, and we don't want to add it to the PR.
     - name: Remove vndor/bundle
       run: rm -rf vendor/bundle
+      shell: bash
 
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v5
