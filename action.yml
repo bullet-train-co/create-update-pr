@@ -90,12 +90,18 @@ runs:
       shell: bash
       run: git merge v${{ env.TARGET_VERSION }}
 
+    - name: Check for conflicts in Gemfile.lock
+      id: gemfile-lock-conflicts
+      shell: bash
+      run: |
+        echo "GEMFILE_LOCK_CONFLICT=$(git status --porcelain Gemfile.lock | grep '^UU'')" >> $GITHUB_OUTPUT
 
     # Gemfile.lock is often a source of conflicts, and it's hard to sort out by hand.
     # Since it's an auto-generated file we can just use whatever is in the downstreadm app
     # and then run `bundle install` to ensure that it's in sync with Gemfile
     - name: Fix Gemfile.lock
       shell: bash
+      if: ${{ steps.gemfile-lock-conflicts.outputs.GEMFILE_LOCK_CONFLICT != '' }}
       run: |
         git checkout HEAD -- Gemfile.lock
         # We have to do this so that a subsequent `bundle install` will work without complaining
