@@ -94,7 +94,7 @@ runs:
       id: gemfile-lock-conflicts
       shell: bash
       run: |
-        echo "GEMFILE_LOCK_CONFLICT=$(git status --porcelain Gemfile.lock | grep '^UU'')" >> $GITHUB_OUTPUT
+        echo "GEMFILE_LOCK_CONFLICT=$(git status --porcelain Gemfile.lock | grep '^UU')" >> $GITHUB_OUTPUT
 
     # Gemfile.lock is often a source of conflicts, and it's hard to sort out by hand.
     # Since it's an auto-generated file we can just use whatever is in the downstreadm app
