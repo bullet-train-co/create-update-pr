@@ -116,7 +116,7 @@ runs:
       shell: bash
       run: |
         echo 'FILES<<EOF' >> $GITHUB_OUTPUT
-        git status --porcelain | grep '^[U|A|D][U|A|D]' | sed 's/^[U|A|D][U|A|D]/*/g'
+        git status --porcelain | grep '^[U|A|D][U|A|D]' | sed 's/^[U|A|D][U|A|D]/*/g' >> $GITHUB_OUTPUT
         echo 'EOF' >> $GITHUB_OUTPUT
 
     - name: Inspect conflict output
