@@ -110,7 +110,6 @@ runs:
         bundle install
         # Now we add the changes and commit
         git add Gemfile.lock
-        git commit --no-edit
 
     - name: Check for conflicts
       id: conflicts
@@ -173,6 +172,17 @@ runs:
     - name: Remove vndor/bundle
       run: rm -rf vendor/bundle
       shell: bash
+
+    - name: Add conflicted files
+      if: ${{ steps.conflicts.outputs.FILES != '' }}
+      run: git add .
+      shell: bash
+
+    - name: Commit changes
+      if: ${{ steps.conflicts.outputs.FILES != '' || steps.gemfile-lock-conflicts.outputs.GEMFILE_LOCK_CONFLICT != '' }}
+      run: git commit --no-edit
+      shell: bash
+
 
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v5
