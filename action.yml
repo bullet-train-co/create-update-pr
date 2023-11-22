@@ -119,6 +119,10 @@ runs:
         git status --porcelain | grep '^[U|A|D][U|A|D]' | sed 's/^[U|A|D][U|A|D]/*/g'
         echo 'EOF' >> $GITHUB_OUTPUT
 
+    - name: Inspect conflict output
+      run: echo "${{ steps.conflicts.outputs.FILES }}"
+      shell: bash
+
     # This step is run when there are no conflicts
     - name: Set PR conflict message for no conflicts
       shell: bash
