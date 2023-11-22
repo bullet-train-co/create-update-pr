@@ -115,7 +115,9 @@ runs:
       id: conflicts
       shell: bash
       run: |
-        echo "FILES=$(git status --porcelain | grep '^[U|A|D][U|A|D]' | sed 's/^[U|A|D][U|A|D]/*/g')" >> $GITHUB_OUTPUT
+        {
+          echo "FILES=$(git status --porcelain | grep '^[U|A|D][U|A|D]' | sed 's/^[U|A|D][U|A|D]/*/g')"
+        }  >> "$GITHUB_OUTPUT"
 
     # This step is run when there are no conflicts
     - name: Set PR conflict message for no conflicts
