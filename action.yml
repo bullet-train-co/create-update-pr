@@ -128,13 +128,13 @@ runs:
       shell: bash
       run: |
         {
-          echo 'FILES<<EOF'
+          echo 'CONFLICTED_FILES<<EOF'
           git status --porcelain | grep '^[U|A|D][U|A|D]' | sed 's/^[U|A|D][U|A|D]/*/g'
           echo EOF
-        } >> "$GITHUB_OUTPUT"
+        } >> "$GITHUB_ENV"
 
     - name: Inspect conflict output
-      run: echo "${{ steps.conflicts.outputs.FILES }}"
+      run: echo "${{ env.CONFLICTED_FILES }}"
       shell: bash
 
     # This step is run when there are no conflicts
@@ -146,7 +146,7 @@ runs:
           echo '🎉 There are no conflicts detected in this PR!'
           echo EOF
         } >> "$GITHUB_ENV"
-      if: steps.conflicts.outputs.FILES == ''
+      if: env.CONFLICTED_FILES == ''
 
     # This step is run when there are conflicts that need to be resolved
     - name: Set PR conflict message for conflicts
@@ -155,7 +155,7 @@ runs:
         {
           echo 'PR_CONFLICT_MESSAGE<<EOF'
           echo '⚠️  **There are conflicts in the following files:**'
-          echo '${{ steps.conflicts.outputs.FILES }}'
+          echo '${{ env.CONFLICTED_FILES }}'
           echo ' '
           echo '**You should pull down this branch, resolve the conflicts, and then push the branch.**'
           echo ' '
@@ -172,21 +172,21 @@ runs:
           echo '```'
           echo EOF
         } >> "$GITHUB_ENV"
-      if: ${{ steps.conflicts.outputs.FILES != '' }}
+      if: ${{ env.CONFLICTED_FILES != '' }}
 
     # This step is run when there are no conflicts
     - name: Set draft status = false
       shell: bash
       run: |
         echo "DRAFT_STATUS=false" >> "$GITHUB_ENV"
-      if: steps.conflicts.outputs.FILES == ''
+      if: env.CONFLICTED_FILES == ''
 
     # This step is run when there are conflicts that need to be resolved
     - name: Set draft status = true
       shell: bash
       run: |
         echo "DRAFT_STATUS=true" >> "$GITHUB_ENV"
-      if: ${{ steps.conflicts.outputs.FILES != '' }}
+      if: ${{ env.CONFLICTED_FILES != '' }}
 
     # This is an artifact of installing the gems, and we don't want to add it to the PR.
     - name: Remove vndor/bundle
@@ -194,12 +194,12 @@ runs:
       shell: bash
 
     - name: Add conflicted files
-      if: ${{ steps.conflicts.outputs.FILES != '' }}
+      if: ${{ env.CONFLICTED_FILES != '' }}
       run: git add .
       shell: bash
 
     - name: Commit changes
-      if: ${{ steps.conflicts.outputs.FILES != '' || steps.gemfile-lock-conflicts.outputs.GEMFILE_LOCK_CONFLICT != '' }}
+      if: ${{ env.CONFLICTED_FILES != '' || steps.gemfile-lock-conflicts.outputs.GEMFILE_LOCK_CONFLICT != '' }}
       run: git commit --no-edit
       shell: bash
 
