@@ -89,13 +89,6 @@ runs:
       shell: bash
       run: git merge v${{ env.TARGET_VERSION }}
 
-    # After merging the latest changes from the start repo the ruby version might have changed. We
-    # run setup-ruby again to ensure that we have the right version.
-    - name: Setup Ruby
-      uses: "ruby/setup-ruby@v1"
-      with:
-        bundler-cache: true
-
     - name: Check for conflicts in Gemfile.lock
       id: gemfile-lock-conflicts
       shell: bash
@@ -105,7 +98,7 @@ runs:
     # Gemfile.lock is often a source of conflicts, and it's hard to sort out by hand.
     # Since it's an auto-generated file we can just use whatever is in the downstreadm app
     # and then run `bundle install` to ensure that it's in sync with Gemfile
-    - name: Fix Gemfile.lock
+    - name: Fix Gemfile.lock - Part 1
       shell: bash
       if: ${{ steps.gemfile-lock-conflicts.outputs.GEMFILE_LOCK_CONFLICT != '' }}
       run: |
@@ -113,8 +106,21 @@ runs:
         # We have to do this so that a subsequent `bundle install` will work without complaining
         # that we have changed Gemfile.lock in a deployment context.
         bundle config unset deployment
-        bundle install
-        # Now we add the changes and commit
+
+    # After merging the latest changes from the start repo the ruby version might have changed. We
+    # run setup-ruby again to ensure that we have the right version. This will also run `bundle install`
+    - name: Setup Ruby - Redux
+      uses: "ruby/setup-ruby@v1"
+      if: ${{ steps.gemfile-lock-conflicts.outputs.GEMFILE_LOCK_CONFLICT != '' }}
+      with:
+        bundler-cache: true
+
+    # Now Gemfile.lock should be de-conflicted
+    - name: Fix Gemfile.lock - Part 2
+      shell: bash
+      if: ${{ steps.gemfile-lock-conflicts.outputs.GEMFILE_LOCK_CONFLICT != '' }}
+      run: |
+        # Now we add the changes
         git add Gemfile.lock
 
     - name: Check for conflicts
