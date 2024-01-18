@@ -41,7 +41,6 @@ runs:
       uses: "ruby/setup-ruby@v1"
       with:
         bundler-cache: true
-        ruby-version: 3.2
 
     - name: Fetch Bullet Train Starter Repo
       shell: bash
