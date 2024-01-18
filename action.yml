@@ -89,6 +89,13 @@ runs:
       shell: bash
       run: git merge v${{ env.TARGET_VERSION }}
 
+    # After merging the latest changes from the start repo the ruby version might have changed. We
+    # run setup-ruby again to ensure that we have the right version.
+    - name: Setup Ruby
+      uses: "ruby/setup-ruby@v1"
+      with:
+        bundler-cache: true
+
     - name: Check for conflicts in Gemfile.lock
       id: gemfile-lock-conflicts
       shell: bash
