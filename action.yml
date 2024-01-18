@@ -129,7 +129,7 @@ runs:
       run: |
         {
           echo 'SESHY_RESPONSE<<EOF'
-          echo 'just a test string'
+          ls -al
           echo EOF
         } >> "$GITHUB_ENV"
 
