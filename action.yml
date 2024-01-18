@@ -123,20 +123,6 @@ runs:
         # Now we add the changes
         git add Gemfile.lock
 
-    - name: Test multi line strings
-      id: step_one
-      shell: bash
-      run: |
-        {
-          echo 'SESHY_RESPONSE<<EOF'
-          ls -al
-          echo EOF
-        } >> "$GITHUB_ENV"
-
-    - name: Inspect multi line string
-      shell: bash
-      run: echo "${{ env.SESHY_RESPONSE }}"
-
     - name: What is git status doing
       shell: bash
       run: |
@@ -146,6 +132,7 @@ runs:
 
     - name: What is git status + grep doing
       shell: bash
+      continue-on-error: true
       run: |
         echo "-------------"
         git status --porcelain | grep '^[U|A|D][U|A|D]'
@@ -153,6 +140,7 @@ runs:
 
     - name: What is git status + grep + sed doing
       shell: bash
+      continue-on-error: true
       run: |
         echo "-------------"
         git status --porcelain | grep '^[U|A|D][U|A|D]' | sed 's/^[U|A|D][U|A|D]/*/g'
@@ -161,6 +149,7 @@ runs:
     - name: Check for conflicts
       id: conflicts
       shell: bash
+      continue-on-error: true
       run: |
         {
           echo 'CONFLICTED_FILES<<EOF'
