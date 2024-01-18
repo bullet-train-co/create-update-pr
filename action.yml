@@ -131,7 +131,7 @@ runs:
           echo 'FILES<<EOF'
           git status --porcelain | grep '^[U|A|D][U|A|D]' | sed 's/^[U|A|D][U|A|D]/*/g'
           echo 'EOF'
-        } >> $GITHUB_OUTPUT
+        } >> "$GITHUB_OUTPUT"
 
     - name: Inspect conflict output
       run: echo "${{ steps.conflicts.outputs.FILES }}"
