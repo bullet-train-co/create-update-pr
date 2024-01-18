@@ -123,6 +123,20 @@ runs:
         # Now we add the changes
         git add Gemfile.lock
 
+    - name: Test multi line strings
+      id: step_one
+      shell: bash
+      run: |
+        {
+          echo 'SESHY_RESPONSE<<EOF'
+          curl https://seshy.me
+          echo EOF
+        } >> "$GITHUB_ENV"
+
+    - name: Inspect multi line string
+      shell: bash
+      run: echo "${{ env.SESHY_RESPONSE }}"
+
     - name: Check for conflicts
       id: conflicts
       shell: bash
