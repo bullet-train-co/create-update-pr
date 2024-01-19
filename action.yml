@@ -108,8 +108,9 @@ runs:
         bundle config unset deployment
 
     # After merging the latest changes from the start repo the ruby version might have changed. We
-    # run setup-ruby again to ensure that we have the right version. This will also run `bundle install`
+    # run setup-ruby again to ensure that we have the right version.
     - name: Setup Ruby - Redux
+      continue-on-error: true # It will complain about the lock file being out of date, but we don't want to stop here
       uses: "ruby/setup-ruby@v1"
       if: ${{ steps.gemfile-lock-conflicts.outputs.GEMFILE_LOCK_CONFLICT != '' }}
       with:
@@ -120,6 +121,8 @@ runs:
       shell: bash
       if: ${{ steps.gemfile-lock-conflicts.outputs.GEMFILE_LOCK_CONFLICT != '' }}
       run: |
+        bundle config unset deployment
+        bundle install
         # Now we add the changes
         git add Gemfile.lock
 
