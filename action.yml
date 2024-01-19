@@ -42,6 +42,13 @@ runs:
       with:
         bundler-cache: true
 
+    - name: Setup node
+      uses: actions/setup-node@v3
+      with:
+        node-version-file: .nvmrc
+        cache: 'yarn'
+        cache-dependency-path: yarn.lock
+
     - name: Fetch Bullet Train Starter Repo
       shell: bash
       run: |
@@ -125,6 +132,56 @@ runs:
         bundle install
         # Now we add the changes
         git add Gemfile.lock
+
+
+
+
+
+
+
+    - name: Check for conflicts in yarn.lock
+      id: yarn-lock-conflicts
+      shell: bash
+      run: |
+        echo "YARN_LOCK_CONFLICT=$(git status --porcelain yarn.lock | grep '^UU')" >> $GITHUB_OUTPUT
+
+    # yarn.lock is often a source of conflicts, and it's hard to sort out by hand.
+    # Since it's an auto-generated file we can just use whatever is in the downstreadm app
+    # and then run `bundle install` to ensure that it's in sync with yarn
+    - name: Fix yarn.lock - Part 1
+      shell: bash
+      if: ${{ steps.yarn-lock-conflicts.outputs.YARN_LOCK_CONFLICT != '' }}
+      run: |
+        git checkout HEAD -- yarn.lock
+
+    # After merging the latest changes from the start repo the node version might have changed. We
+    # run setup-node again to ensure that we have the right version.
+    - name: Setup node
+      #continue-on-error: true # It will complain about the lock file being out of date, but we don't want to stop here
+      uses: actions/setup-node@v3
+      with:
+        node-version-file: .nvmrc
+        cache: 'yarn'
+        cache-dependency-path: yarn.lock
+
+    # Now yarn.lock should be de-conflicted
+    - name: Fix yarn.lock - Part 2
+      shell: bash
+      if: ${{ steps.yarn-lock-conflicts.outputs.YARN_LOCK_CONFLICT != '' }}
+      run: |
+        yarn install
+        # Now we add the changes
+        git add yarn.lock
+
+
+
+
+
+
+
+
+
+
 
     - name: What is git status doing
       shell: bash
