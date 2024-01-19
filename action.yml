@@ -96,6 +96,12 @@ runs:
       shell: bash
       run: git merge v${{ env.TARGET_VERSION }}
 
+    ####################################################################################################
+    #
+    # De-conflicting Gemfile.lock
+    #
+    ####################################################################################################
+
     - name: Check for conflicts in Gemfile.lock
       id: gemfile-lock-conflicts
       shell: bash
@@ -133,11 +139,11 @@ runs:
         # Now we add the changes
         git add Gemfile.lock
 
-
-
-
-
-
+    ####################################################################################################
+    #
+    # De-conflicting yarn.lock
+    #
+    ####################################################################################################
 
     - name: Check for conflicts in yarn.lock
       id: yarn-lock-conflicts
@@ -173,38 +179,11 @@ runs:
         # Now we add the changes
         git add yarn.lock
 
-
-
-
-
-
-
-
-
-
-
-    - name: What is git status doing
-      shell: bash
-      run: |
-        echo "-------------"
-        git status --porcelain
-        echo "-------------"
-
-    - name: What is git status + grep doing
-      shell: bash
-      continue-on-error: true
-      run: |
-        echo "-------------"
-        git status --porcelain | grep '^[U|A|D][U|A|D]'
-        echo "-------------"
-
-    - name: What is git status + grep + sed doing
-      shell: bash
-      continue-on-error: true
-      run: |
-        echo "-------------"
-        git status --porcelain | grep '^[U|A|D][U|A|D]' | sed 's/^[U|A|D][U|A|D]/*/g'
-        echo "-------------"
+    ####################################################################################################
+    #
+    # Check for other conflicts
+    #
+    ####################################################################################################
 
     - name: Check for conflicts
       id: conflicts
@@ -283,10 +262,9 @@ runs:
       shell: bash
 
     - name: Commit changes
-      if: ${{ env.CONFLICTED_FILES != '' || steps.gemfile-lock-conflicts.outputs.GEMFILE_LOCK_CONFLICT != '' }}
+      if: ${{ env.CONFLICTED_FILES != '' || steps.gemfile-lock-conflicts.outputs.GEMFILE_LOCK_CONFLICT != '' || steps.yarn-lock-conflicts.outputs.YARN_LOCK_CONFLICT != '' }}
       run: git commit --no-edit
       shell: bash
-
 
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v5
