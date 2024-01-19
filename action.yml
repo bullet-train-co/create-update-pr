@@ -257,9 +257,11 @@ runs:
       shell: bash
 
     # This is an artifact of installing npm packages, and we don't want to add it to the PR.
-    - name: Remove .yarn/cache
-      run: rm -rf .yarn/cache
-      shell: bash
+    # TODO: Maybe we don't need to do this. We have .yarn/cache in .gitignore, so it should
+    # be ignored by default.
+    #- name: Remove .yarn/cache
+      #run: rm -rf .yarn/cache
+      #shell: bash
 
     - name: Add conflicted files
       if: ${{ env.CONFLICTED_FILES != '' }}
