@@ -42,11 +42,23 @@ runs:
       with:
         bundler-cache: true
 
+    - name: Detect package manager
+      id: detect-package-manager
+      shell: bash
+      run: |
+        node -p "'PACKAGE_MANAGER='+require('./package.json').packageManager?.split?.('@')?.[0]" >> "$GITHUB_OUTPUT"
+
+    - name: Install package manager
+      shell: bash
+      if: ${{ steps.detect-package-manager.PACKAGE_MANAGER != '' }}
+      run: |
+        corepack enable ${{ steps.detect-package-manager.PACKAGE_MANAGER }}
+
     - name: Setup node
       uses: actions/setup-node@v3
       with:
         node-version-file: .nvmrc
-        cache: 'yarn'
+        cache: ${{ steps.detect-package-manager.PACKAGE_MANAGER != '' && steps.detect-package-manager.PACKAGE_MANAGER || 'yarn' }}
         cache-dependency-path: yarn.lock
 
     - name: Fetch Bullet Train Starter Repo
@@ -160,6 +172,18 @@ runs:
       run: |
         git checkout HEAD -- yarn.lock
 
+    - name: Detect package manager
+      id: detect-package-manager-redux
+      shell: bash
+      run: |
+        node -p "'PACKAGE_MANAGER='+require('./package.json').packageManager?.split?.('@')?.[0]" >> "$GITHUB_OUTPUT"
+
+    - name: Install package manager
+      shell: bash
+      if: ${{ steps.detect-package-manager-redux.PACKAGE_MANAGER != '' }}
+      run: |
+        corepack enable ${{ steps.detect-package-manager-redux.PACKAGE_MANAGER }}
+
     # After merging the latest changes from the start repo the node version might have changed. We
     # run setup-node again to ensure that we have the right version.
     - name: Setup node
@@ -167,7 +191,7 @@ runs:
       uses: actions/setup-node@v3
       with:
         node-version-file: .nvmrc
-        cache: 'yarn'
+        cache: ${{ steps.detect-package-manager-redux.PACKAGE_MANAGER != '' && steps.detect-package-manager-redux.PACKAGE_MANAGER || 'yarn' }}
         cache-dependency-path: yarn.lock
 
     # Now yarn.lock should be de-conflicted
