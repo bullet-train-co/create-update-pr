@@ -50,15 +50,15 @@ runs:
 
     - name: Install package manager
       shell: bash
-      if: ${{ steps.detect-package-manager.PACKAGE_MANAGER != '' }}
+      if: ${{ steps.detect-package-manager.outputs.PACKAGE_MANAGER != '' }}
       run: |
-        corepack enable ${{ steps.detect-package-manager.PACKAGE_MANAGER }}
+        corepack enable ${{ steps.detect-package-manager.outputs.PACKAGE_MANAGER }}
 
     - name: Setup node
       uses: actions/setup-node@v3
       with:
         node-version-file: .nvmrc
-        cache: ${{ steps.detect-package-manager.PACKAGE_MANAGER != '' && steps.detect-package-manager.PACKAGE_MANAGER || 'yarn' }}
+        cache: ${{ steps.detect-package-manager.outputs.PACKAGE_MANAGER != '' && steps.detect-package-manager.outputs.PACKAGE_MANAGER || 'yarn' }}
         cache-dependency-path: yarn.lock
 
     - name: Fetch Bullet Train Starter Repo
@@ -188,9 +188,9 @@ runs:
 
     - name: Install package manager
       shell: bash
-      if: ${{ steps.package-json-conflicts.outputs.PACKAGE_JSON_CONFLICT == '' && steps.detect-package-manager-redux.PACKAGE_MANAGER != '' }}
+      if: ${{ steps.package-json-conflicts.outputs.PACKAGE_JSON_CONFLICT == '' && steps.detect-package-manager-redux.outputs.PACKAGE_MANAGER != '' }}
       run: |
-        corepack enable ${{ steps.detect-package-manager-redux.PACKAGE_MANAGER }}
+        corepack enable ${{ steps.detect-package-manager-redux.outputs.PACKAGE_MANAGER }}
 
     # After merging the latest changes from the start repo the node version might have changed. We
     # run setup-node again to ensure that we have the right version.
@@ -200,7 +200,7 @@ runs:
       if: ${{ steps.package-json-conflicts.outputs.PACKAGE_JSON_CONFLICT == '' }}
       with:
         node-version-file: .nvmrc
-        cache: ${{ steps.detect-package-manager-redux.PACKAGE_MANAGER != '' && steps.detect-package-manager-redux.PACKAGE_MANAGER || 'yarn' }}
+        cache: ${{ steps.detect-package-manager-redux.outputs.PACKAGE_MANAGER != '' && steps.detect-package-manager-redux.outputs.PACKAGE_MANAGER || 'yarn' }}
         cache-dependency-path: yarn.lock
 
     # Now yarn.lock should be de-conflicted
