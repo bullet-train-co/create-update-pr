@@ -42,11 +42,23 @@ runs:
       with:
         bundler-cache: true
 
+    - name: Detect package manager
+      id: detect-package-manager
+      shell: bash
+      run: |
+        node -p "'PACKAGE_MANAGER='+require('./package.json').packageManager?.split?.('@')?.[0]" >> "$GITHUB_OUTPUT"
+
+    - name: Install package manager
+      shell: bash
+      if: ${{ steps.detect-package-manager.outputs.PACKAGE_MANAGER != '' }}
+      run: |
+        corepack enable ${{ steps.detect-package-manager.outputs.PACKAGE_MANAGER }}
+
     - name: Setup node
       uses: actions/setup-node@v3
       with:
         node-version-file: .nvmrc
-        cache: 'yarn'
+        cache: ${{ steps.detect-package-manager.outputs.PACKAGE_MANAGER != '' && steps.detect-package-manager.outputs.PACKAGE_MANAGER || 'yarn' }}
         cache-dependency-path: yarn.lock
 
     - name: Fetch Bullet Train Starter Repo
@@ -145,9 +157,16 @@ runs:
     #
     ####################################################################################################
 
+    - name: Check for conflicts in package.json
+      id: package-json-conflicts
+      shell: bash
+      run: |
+        echo "PACKAGE_JSON_CONFLICT=$(git status --porcelain package.json | grep '^UU')" >> $GITHUB_OUTPUT
+
     - name: Check for conflicts in yarn.lock
       id: yarn-lock-conflicts
       shell: bash
+      if: ${{ steps.package-json-conflicts.outputs.PACKAGE_JSON_CONFLICT == '' }}
       run: |
         echo "YARN_LOCK_CONFLICT=$(git status --porcelain yarn.lock | grep '^UU')" >> $GITHUB_OUTPUT
 
@@ -156,24 +175,38 @@ runs:
     # and then run `bundle install` to ensure that it's in sync with yarn
     - name: Fix yarn.lock - Part 1
       shell: bash
-      if: ${{ steps.yarn-lock-conflicts.outputs.YARN_LOCK_CONFLICT != '' }}
+      if: ${{ steps.package-json-conflicts.outputs.PACKAGE_JSON_CONFLICT == '' && steps.yarn-lock-conflicts.outputs.YARN_LOCK_CONFLICT != '' }}
       run: |
         git checkout HEAD -- yarn.lock
+
+    - name: Detect package manager
+      id: detect-package-manager-redux
+      shell: bash
+      if: ${{ steps.package-json-conflicts.outputs.PACKAGE_JSON_CONFLICT == '' }}
+      run: |
+        node -p "'PACKAGE_MANAGER='+require('./package.json').packageManager?.split?.('@')?.[0]" >> "$GITHUB_OUTPUT"
+
+    - name: Install package manager
+      shell: bash
+      if: ${{ steps.package-json-conflicts.outputs.PACKAGE_JSON_CONFLICT == '' && steps.detect-package-manager-redux.outputs.PACKAGE_MANAGER != '' }}
+      run: |
+        corepack enable ${{ steps.detect-package-manager-redux.outputs.PACKAGE_MANAGER }}
 
     # After merging the latest changes from the start repo the node version might have changed. We
     # run setup-node again to ensure that we have the right version.
     - name: Setup node
       #continue-on-error: true # It will complain about the lock file being out of date, but we don't want to stop here
       uses: actions/setup-node@v3
+      if: ${{ steps.package-json-conflicts.outputs.PACKAGE_JSON_CONFLICT == '' }}
       with:
         node-version-file: .nvmrc
-        cache: 'yarn'
+        cache: ${{ steps.detect-package-manager-redux.outputs.PACKAGE_MANAGER != '' && steps.detect-package-manager-redux.outputs.PACKAGE_MANAGER || 'yarn' }}
         cache-dependency-path: yarn.lock
 
     # Now yarn.lock should be de-conflicted
     - name: Fix yarn.lock - Part 2
       shell: bash
-      if: ${{ steps.yarn-lock-conflicts.outputs.YARN_LOCK_CONFLICT != '' }}
+      if: ${{ steps.package-json-conflicts.outputs.PACKAGE_JSON_CONFLICT == '' && steps.yarn-lock-conflicts.outputs.YARN_LOCK_CONFLICT != '' }}
       run: |
         yarn install --no-immutable
         # Now we add the changes
