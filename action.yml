@@ -55,7 +55,7 @@ runs:
         corepack enable ${{ steps.detect-package-manager.outputs.PACKAGE_MANAGER }}
 
     - name: Setup node
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
         node-version-file: .nvmrc
         cache: ${{ steps.detect-package-manager.outputs.PACKAGE_MANAGER != '' && steps.detect-package-manager.outputs.PACKAGE_MANAGER != 'undefined' && steps.detect-package-manager.outputs.PACKAGE_MANAGER || 'yarn' }}
@@ -196,7 +196,7 @@ runs:
     # run setup-node again to ensure that we have the right version.
     - name: Setup node
       #continue-on-error: true # It will complain about the lock file being out of date, but we don't want to stop here
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       if: ${{ steps.package-json-conflicts.outputs.PACKAGE_JSON_CONFLICT == '' }}
       with:
         node-version-file: .nvmrc
