@@ -139,7 +139,14 @@ runs:
       uses: "ruby/setup-ruby@v1"
       if: ${{ steps.gemfile-lock-conflicts.outputs.GEMFILE_LOCK_CONFLICT != '' }}
       with:
-        bundler-cache: true
+        bundler-cache: false
+
+    - name: Install Bundler & Bundle Gems
+      shell: bash
+      run: |
+        gem install bundler
+        bundle config unset deployment
+        bundle install
 
     # Now Gemfile.lock should be de-conflicted
     - name: Fix Gemfile.lock - Part 2
