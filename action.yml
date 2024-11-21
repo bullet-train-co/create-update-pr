@@ -353,13 +353,19 @@ runs:
           git checkout -b bullet-train-update/${{ env.TARGET_VERSION }} --track origin/bullet-train-update/${{ env.TARGET_VERSION }}
           ```
 
-          The use the SHA of the merge commit to revert changes to any files:
+          Use the SHA of the starting commit to revert all of the changes in a particular file:
 
           ```
           git checkout ${{steps.capture-starting-commit.outputs.SHA}} -- path/to/file
           ```
 
-          Then commit those changes and push the branch:
+          Or use the `-p` option to selectively choose which portions of the file to revert:
+
+          ```
+          git checkout -p ${{steps.capture-starting-commit.outputs.SHA}} -- path/to/file
+          ```
+
+          After getthing things the way you want them, commit the changes and push the branch:
 
           ```
           git add .
